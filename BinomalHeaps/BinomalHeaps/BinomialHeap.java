@@ -99,7 +99,7 @@ public class BinomialHeap
 	 */
 	public boolean empty()
 	{
-		return false; // should be replaced by student code
+		return size == 0;
 	}
 
 	/**
