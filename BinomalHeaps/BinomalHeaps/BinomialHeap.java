@@ -19,13 +19,42 @@ public class BinomialHeap
 	 */
 	public HeapItem insert(int key, String info)
 
-	{    
-		HeapItem H = new HeapItem(key, info);
-		int i = this.size;
-		if(i%2 == 1) {
-			
+	{
+		HeapItem new_item = new HeapItem(key, info);
+		HeapNode new_node = new HeapNode(new_item,null,null,null,1);
+		if (empty()) {
+
+			new_item.setNode(new_node);
+			return new_item;
 		}
-		return; // should be replaced by student code
+
+		int i = this.size;
+		if(i%2 == 0) {
+			HeapItem item = new HeapItem(key, info);
+			HeapNode node = new HeapNode(item, null, last.next, null, 1);
+			last.next = node;
+			item.setNode(node);
+			this.size ++;
+			return item;
+		}
+
+		HeapItem item = new HeapItem(key, info);
+		HeapNode node = new HeapNode(item, null, last.next, null, 1); // node.next will be the lonely subtree
+		item.setNode(node);
+
+		int s = this.size;
+		int exp = 0;
+		while(s%2 == 1) {
+			s /= 2;
+			if (node.next.getAmountOfChildren() == Math.pow(2, exp)) {
+
+			}
+			exp ++;
+
+		}
+
+		this.size++;
+		return item; // should be replaced by student code
 	}
 
 	/**
@@ -88,7 +117,7 @@ public class BinomialHeap
 	 */
 	public int size()
 	{
-		return 42; // should be replaced by student code
+		return size; // should be replaced by student code
 	}
 
 	/**
@@ -99,7 +128,7 @@ public class BinomialHeap
 	 */
 	public boolean empty()
 	{
-		return false; // should be replaced by student code
+		return size == 0;
 	}
 
 	/**
@@ -109,7 +138,14 @@ public class BinomialHeap
 	 */
 	public int numTrees()
 	{
-		return 0; // should be replaced by student code
+		int size = this.size;
+		int ret = 0;
+		while (size>0)
+		{
+			if (size % 2 == 1){ret++;}
+			size/=2;
+		}
+		return ret;
 	}
 
 	/**
@@ -131,6 +167,7 @@ public class BinomialHeap
 			this.parent = parent;
 			this.rank = rank;
 		}
+
 	}
 
 	/**
@@ -142,10 +179,13 @@ public class BinomialHeap
 		public int key;
 		public String info;
 		
-		public HeapItem() {
-			this.node = node;
+		public HeapItem(int key,String info) {
+			this.node = null;
 			this.key = key;
 			this.info = info;
+		}
+		public void setNode(HeapNode node){
+			this.node = node;
 		}
 	}
 }
