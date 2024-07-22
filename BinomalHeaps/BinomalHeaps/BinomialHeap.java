@@ -106,8 +106,23 @@ public class BinomialHeap
 	 *
 	 */
 	public void meld(BinomialHeap heap2)
+	/*
+	take into account:
+	size1 can be bigger smaller or equals to size2
+
+	 */
 	{
-		return; // should be replaced by student code   		
+
+	}
+
+	private void concatenate(HeapItem tree1, HeapItem tree2) {
+		if (tree1.rank != 0)
+		{
+			tree2.next = tree1.child.next;
+			tree1.child.next = tree2;
+		}
+			tree1.child = tree2;
+			tree2.parent = tree1;
 	}
 
 	/**
