@@ -34,27 +34,27 @@ public class BinomialHeap
 		HeapNode new_node = new HeapNode(new_item, null, null, null, 0);
 		if (this.empty()) {
 			new_item.setNode(new_node);
+			this.size++;
 			return new_item;
 		}
 
 		int i = this.size;
 		if (i%2 == 0) {
-			HeapItem new_item2 = new HeapItem(key, info);
-			HeapNode new_node2 = new HeapNode(new_item2, null, this.last.next, null, 0);
-			this.last.next = new_node2;
-			new_item2.setNode(new_node2);
+			new_node = new HeapNode(new_item, null, this.last.next, null, 0);
+			this.last.next = new_node;
+			new_item.setNode(new_node);
 			this.size ++;
-			return new_item2;
+			return new_item;
 		}
 
-		HeapItem item = new HeapItem(key, info);
-		HeapNode node = new HeapNode(item, null, this.last.next, null, 0); // node.next will be the lonely subtree
-		item.setNode(node);
-		BinomialHeap newBinomialHeap = new BinomialHeap(node, node, 1);
+		new_node= new HeapNode(new_item, null, this.last.next, null, 0); // node.next will be the lonely subtree
+		new_item.setNode(new_node);
+		
+		BinomialHeap newBinomialHeap = new BinomialHeap(new_node, new_node, 1);
 		this.meld(newBinomialHeap);
 		
 		this.size++;
-		return item; 
+		return new_item; 
 	}
 
 	/**
