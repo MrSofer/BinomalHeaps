@@ -38,8 +38,7 @@ public class BinomialHeap
 			return new_item;
 		}
 
-		int i = this.size;
-		if (i%2 == 0) {
+		if (this.size%2 == 0) {
 			new_node = new HeapNode(new_item, null, this.last.next, null, 0);
 			this.last.next = new_node;
 			new_item.setNode(new_node);
