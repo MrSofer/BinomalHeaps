@@ -23,32 +23,31 @@ public class BinomialHeap
 		HeapItem new_item = new HeapItem(key, info);
 		HeapNode new_node = new HeapNode(new_item,null,null,null,1);
 		if (empty()) {
-
 			new_item.setNode(new_node);
 			return new_item;
 		}
 
 		int i = this.size;
-		if(i%2 == 0) {
-			HeapItem item = new HeapItem(key, info);
-			HeapNode node = new HeapNode(item, null, last.next, null, 1);
-			last.next = node;
-			item.setNode(node);
+		if (i%2 == 0) {
+			//HeapItem new_item = new HeapItem(key, info);
+			//HeapNode new_node = new HeapNode(item, null, this.last.next, null, 0);
+			this.last.next = new_node;
+			new_item.setNode(new_node);
 			this.size ++;
-			return item;
+			return new_item;
 		}
 
 		HeapItem item = new HeapItem(key, info);
-		HeapNode node = new HeapNode(item, null, last.next, null, 1); // node.next will be the lonely subtree
+		HeapNode node = new HeapNode(item, null, this.last.next, null, 1); // node.next will be the lonely subtree
 		item.setNode(node);
 
 		int s = this.size;
 		int exp = 0;
 		while(s%2 == 1) {
 			s /= 2;
-			if (node.next.getAmountOfChildren() == Math.pow(2, exp)) {
+			//if ("node.next.getAmountOfChildren()" == Math.pow(2, exp)) {
 
-			}
+		//	}
 			exp ++;
 
 		}
@@ -167,7 +166,10 @@ public class BinomialHeap
 			this.parent = parent;
 			this.rank = rank;
 		}
-
+		public String toString() {
+			return "<" + String.valueOf(item.key) + ">";
+		}
+		
 	}
 
 	/**
@@ -179,7 +181,7 @@ public class BinomialHeap
 		public int key;
 		public String info;
 		
-		public HeapItem(int key,String info) {
+		public HeapItem(int key, String info) {
 			this.node = null;
 			this.key = key;
 			this.info = info;
@@ -187,5 +189,20 @@ public class BinomialHeap
 		public void setNode(HeapNode node){
 			this.node = node;
 		}
+		public String toString() {
+			return "Item {key:" + String.valueOf(key) + ", info:" + info 
+					+ ", child:" + ((node.child == null) ? "null" : node.child) 
+					+ ", next:" + ((node.next == null) ? "null" : node.next) 
+					+ ", parent:" + ((node.parent == null) ? "null" : node.parent)
+					+ ", rank:" + node.rank + "}";
+		}
+	}
+	
+	public static void main(String[] args) {
+		HeapItem i = new HeapItem(3, "hello");
+		HeapNode g = new HeapNode(i, null, null, null, 0);
+		HeapNode n = new HeapNode(i, null, g, null, 0);
+		i.setNode(n);
+		System.out.println(i);
 	}
 }
