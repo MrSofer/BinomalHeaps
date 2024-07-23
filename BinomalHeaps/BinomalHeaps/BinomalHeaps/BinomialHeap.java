@@ -9,7 +9,17 @@ public class BinomialHeap
 	public int size;
 	public HeapNode last;
 	public HeapNode min;
-
+	
+	public BinomialHeap() {
+		this.size = 0;
+		this.last = null;
+		this.min = null;
+	}
+	public BinomialHeap(HeapNode last, HeapNode min, int size) {
+		this.size = size;
+		this.last = last;
+		this.min = min;
+	}
 	/**
 	 * 
 	 * pre: key > 0
@@ -21,39 +31,30 @@ public class BinomialHeap
 
 	{
 		HeapItem new_item = new HeapItem(key, info);
-		HeapNode new_node = new HeapNode(new_item,null,null,null,1);
-		if (empty()) {
+		HeapNode new_node = new HeapNode(new_item, null, null, null, 0);
+		if (this.empty()) {
 			new_item.setNode(new_node);
 			return new_item;
 		}
 
 		int i = this.size;
 		if (i%2 == 0) {
-			//HeapItem new_item = new HeapItem(key, info);
-			//HeapNode new_node = new HeapNode(item, null, this.last.next, null, 0);
-			this.last.next = new_node;
-			new_item.setNode(new_node);
+			HeapItem new_item2 = new HeapItem(key, info);
+			HeapNode new_node2 = new HeapNode(new_item2, null, this.last.next, null, 0);
+			this.last.next = new_node2;
+			new_item2.setNode(new_node2);
 			this.size ++;
-			return new_item;
+			return new_item2;
 		}
 
 		HeapItem item = new HeapItem(key, info);
-		HeapNode node = new HeapNode(item, null, this.last.next, null, 1); // node.next will be the lonely subtree
+		HeapNode node = new HeapNode(item, null, this.last.next, null, 0); // node.next will be the lonely subtree
 		item.setNode(node);
-
-		int s = this.size;
-		int exp = 0;
-		while(s%2 == 1) {
-			s /= 2;
-			//if ("node.next.getAmountOfChildren()" == Math.pow(2, exp)) {
-
-		//	}
-			exp ++;
-
-		}
-		System.out.println("hello");
+		BinomialHeap newBinomialHeap = new BinomialHeap(node, node, 1);
+		this.meld(newBinomialHeap);
+		
 		this.size++;
-		return item; // should be replaced by student code
+		return item; 
 	}
 
 	/**
@@ -199,10 +200,11 @@ public class BinomialHeap
 	}
 	
 	public static void main(String[] args) {
-		HeapItem i = new HeapItem(3, "hello");
-		HeapNode g = new HeapNode(i, null, null, null, 0);
-		HeapNode n = new HeapNode(i, null, g, null, 0);
-		i.setNode(n);
-		System.out.println(i);
+		BinomialHeap b = new BinomialHeap();
+		///HeapItem i = new HeapItem(3, "hello");
+		///HeapNode g = new HeapNode(i, null, null, null, 0);
+		///HeapNode n = new HeapNode(i, null, g, null, 0);
+		///i.setNode(n);
+		///System.out.println(i);
 	}
 }
