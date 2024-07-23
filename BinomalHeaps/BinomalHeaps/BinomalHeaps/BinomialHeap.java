@@ -1,4 +1,4 @@
-/**
+/**  Jonathan King
  * BinomialHeap
  *
  * An implementation of binomial heap over positive integers.
@@ -52,7 +52,7 @@ public class BinomialHeap
 			exp ++;
 
 		}
-
+		System.out.println("hello");
 		this.size++;
 		return item; // should be replaced by student code
 	}
