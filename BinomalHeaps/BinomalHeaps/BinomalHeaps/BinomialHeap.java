@@ -55,16 +55,77 @@ public class BinomialHeap
 		this.size++;
 		return new_item; 
 	}
-
 	/**
 	 * 
 	 * Delete the minimal item
 	 *
 	 */
 	public void deleteMin()
-	{
-		return; // should be replaced by student code
+	{		
+		if (min == null) return;	
 
+		HeapNode old_minimum = this.min;
+		
+		/// deleting the minimum
+		if(this.min.next == this.min) {
+			this.min = null;
+			this.last = null;
+			this.size--;
+			meldChildrenWithMainRow(old_minimum);
+		}
+		else {
+			HeapNode tmp = this.min;
+			while(tmp.next != this.min) {
+				tmp = tmp.next;
+			}
+			tmp.next = tmp.next.next;
+			// last and min will be properly updated in meld(). For now, we update
+			// the heap's last and min as if we didn't concatenate the heap
+			// with the old minimum's children
+			while (tmp.rank < tmp.next.rank) {
+				tmp = tmp.next;
+			}
+			this.last = tmp;
+			this.min = findMin().node;
+			this.size --;
+			// creating new Binomial heap from children and melding with the rest of the heap	
+			meldChildrenWithMainRow(old_minimum);
+		}
+		return; 
+	}
+	/**
+	 * 
+	 * meld's the chosen node's children with the original heap. takes care of every exception
+	 *
+	 */
+	public void meldChildrenWithMainRow(HeapNode n) {
+		if (n == null) return;
+		if (n.child != null) {
+			if (n.child.next != n.child) {
+				// finding the children's minimum
+				HeapNode kid = n.child.next;
+				HeapNode minimum = n.child;
+				n.child.parent = null;
+				while (kid != n.child) {
+					kid.parent = null;
+					if (kid.item.key < minimum.item.key) {
+						minimum = kid;
+					}
+					kid = kid.next;
+				}	
+				// creating a new binomial heap to meld with to original binomial heap
+				BinomialHeap b = new BinomialHeap(n.child, minimum, (int)(Math.pow(2,n.child.rank)));
+				// melding the binomial heap of the children with the original binomial heap
+				this.meld(b);
+			}
+			else {
+				n.child.parent = null;
+				BinomialHeap b = new BinomialHeap(n.child, n.child, 1);
+				this.meld(b);
+			}
+			return;
+		}
+		else return;
 	}
 
 	/**
@@ -74,7 +135,16 @@ public class BinomialHeap
 	 */
 	public HeapItem findMin()
 	{
-		return null; // should be replaced by student code
+		if (empty()) return null;
+		HeapNode tmp = last.next;
+		HeapNode minimum = last;
+		while (tmp != last) {
+			if (tmp.item.key < minimum.item.key) {
+				minimum = tmp;
+			}
+			tmp = tmp.next;
+		}	
+		return minimum.item;
 	} 
 
 	/**
@@ -116,7 +186,7 @@ public class BinomialHeap
 	 */
 	public int size()
 	{
-		return size; // should be replaced by student code
+		return this.size; 
 	}
 
 	/**
