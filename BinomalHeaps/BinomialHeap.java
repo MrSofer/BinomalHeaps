@@ -111,17 +111,21 @@ public class BinomialHeap
 	size1 can be bigger smaller or equals to size2
 
 	 */
+
 	{
+		this.size += heap2.size;
+
 		HeapNode this_node = this.last;
 		HeapNode heap2_node = heap2.last.next;
+		HeapNode im_back = heap2.last.next;
 		HeapNode this_next, heap2_next;
 
 		do // remember we may need to meld a single node to another heap, remember the idea of a first entry pass
 		{
-			this_next = this_node.next;
 
 			if (this_node.next.rank > heap2_node.rank)
 			{
+				this_next = this_node.next;
 				this_node.next = heap2_node;
 
 				while (heap2_node.next.rank < this_next.rank)
@@ -133,42 +137,78 @@ public class BinomialHeap
 				heap2_node.next = this_next;
 				this_node = heap2_node;
 				heap2_node = heap2_next;
-			}
-
-			if (this_node.next.rank == heap2_node.rank)
+			} else if (this_node.next.rank == heap2_node.rank)
 			{
-				if (this_node.next.item.key < heap2_node.item.key)
+				heap2_next = heap2_node.next;
+				if (this_node.next.item.key <= heap2_node.item.key)
 				{
-					heap2_next = heap2_node.next;
 					this_node.next.concatenate(heap2_node);
-					heap2_node = heap2_next;
-				}
+					check_remainder(this_node, heap2_next);
+                }
 				else
 				{
 					this_next = this_node.next;
 					this_node.next = heap2_node;
-					heap2_next = heap2_node.next;
 					heap2_node.next = this_next.next;
 					heap2_node.concatenate(this_next);
-					this_node = heap2_node;
-					heap2_node = heap2_next;
-				}
-			}
-
-			this_node = this_node.next;
-		} while (this_node != this.last);
-
-		while (this.last.rank == heap2_node.rank)
-		{
-
-		}
+					check_remainder(this_node, heap2_next);
+                }
+				this_node = this_node.next;
+                heap2_node = heap2_next;
 
 
+            }
+			else{this_node = this_node.next;}
 
+		}while (this_node != this.last && this_node.child != this.last
+				&& heap2_node != im_back && heap2_node.child != im_back);
 
+		if (this_node.child == this.last){this.last = this_node;}
+
+		HeapItem min_item = this.findMin();
+		this.min = min_item.node;
 
 	}
 
+	private void check_remainder(HeapNode this_node, HeapNode heap2_next) {
+
+		HeapNode this_next = this_node.next;
+
+		while ((this_node.next.rank == this_node.next.next.rank &&
+				this_node.next.rank != heap2_next.rank)
+				|| (this_node.next.rank != this_node.next.next.rank &&
+				this_node.next.rank == heap2_next.rank)) {
+
+			if (this_node.next.rank == this_node.next.next.rank)
+			{
+				if (this_node == this_node.next){break;}
+				merge_remainder(this_node, this_node.next, false);
+			}
+			else
+			{
+				merge_remainder(this_node, heap2_next, true);
+			}
+		}
+	}
+
+	private void merge_remainder(HeapNode this_node, HeapNode other_node, boolean are_we_on_heap_2)
+	{
+		HeapNode other_next = other_node.next;
+
+		if (this_node.next.item.key <= other_node.item.key)
+		{
+			this_node.next.concatenate(other_node);
+		}
+		else
+		{
+			HeapNode this_next = this_node.next;
+			if (are_we_on_heap_2)
+			{other_node.next = this_node.next.next;} // problematic
+			other_node.concatenate(this_next);
+			this_node.next = other_node;
+		}
+		other_node = other_next;
+	}
 
 	/**
 	 * 
@@ -227,15 +267,16 @@ public class BinomialHeap
 			this.parent = parent;
 			this.rank = rank;
 		}
-		protected static void concatenate(HeapNode node2)
+		protected void concatenate(HeapNode node2)
 		{
-			if (tree1.rank != 0)
+			if (this.rank != 0)
 			{
 				node2.next = this.child.next;
 				this.child.next = node2;
 			}
 			this.child = node2;
 			node2.parent = this;
+			this.rank++;
 		}
 
 	}
