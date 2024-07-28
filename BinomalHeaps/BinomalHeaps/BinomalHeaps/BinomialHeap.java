@@ -155,7 +155,20 @@ public class BinomialHeap
 	 * 
 	 */
 	public void decreaseKey(HeapItem item, int diff) 
-	{    
+	{   
+		item.key -= diff;
+		HeapItem nomad = item;
+		while(nomad.node.parent != null) {
+			if (nomad.key < nomad.node.parent.item.key) {
+				int tmp_key = nomad.key;
+				nomad.key = nomad.node.parent.item.key;
+				nomad = nomad.node.parent.item;
+				nomad.key = tmp_key;		
+			}
+			else break;
+		}
+		if (nomad.key < min.item.key) min = nomad.node;
+
 		return; // should be replaced by student code
 	}
 
@@ -166,6 +179,9 @@ public class BinomialHeap
 	 */
 	public void delete(HeapItem item) 
 	{    
+		if (item.key > min.item.key) decreaseKey(item, item.key - this.min.item.key + 1);
+		else decreaseKey(item, item.key - this.min.item.key);
+		deleteMin();
 		return; // should be replaced by student code
 	}
 
