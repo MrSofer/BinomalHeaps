@@ -31,28 +31,30 @@ public class BinomialHeap
 
 	{
 		HeapItem new_item = new HeapItem(key, info);
-		HeapNode new_node = new HeapNode(new_item, null, null, null, 0);
+		HeapNode new_node;		
 		if (this.empty()) {
+			new_node = new HeapNode(new_item, null, null, null, 0);
 			new_item.setNode(new_node);
 			this.size++;
+			this.min = new_node;
+			this.last = new_node;
 			return new_item;
 		}
-
 		if (this.size%2 == 0) {
 			new_node = new HeapNode(new_item, null, this.last.next, null, 0);
 			this.last.next = new_node;
 			new_item.setNode(new_node);
 			this.size ++;
+			if(new_item.key < this.min.item.key) this.min = new_node;
 			return new_item;
 		}
-
-		new_node= new HeapNode(new_item, null, this.last.next, null, 0); // node.next will be the lonely subtree
+		
+		new_node = new HeapNode(new_item, null, this.last.next, null, 0); // node.next will be the lonely subtree
 		new_item.setNode(new_node);
 		
 		BinomialHeap newBinomialHeap = new BinomialHeap(new_node, new_node, 1);
 		this.meld(newBinomialHeap);
 		
-		this.size++;
 		return new_item; 
 	}
 	/**
