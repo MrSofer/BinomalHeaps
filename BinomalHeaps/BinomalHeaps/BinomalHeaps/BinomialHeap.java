@@ -68,6 +68,7 @@ public class BinomialHeap
 		HeapNode new_node;		
 		if (this.empty()) {
 			new_node = new HeapNode(new_item, null, null, null, 0);
+			new_node.next = new_node;
 			new_item.setNode(new_node);
 			this.size++;
 			this.min = new_node;
@@ -83,7 +84,7 @@ public class BinomialHeap
 			return new_item;
 		}
 		
-		new_node = new HeapNode(new_item, null, this.last.next, null, 0); // node.next will be the lonely subtree
+		new_node = new HeapNode(new_item, null, this.last.next, null, 0);// node.next will be the lonely subtree
 		new_item.setNode(new_node);
 		
 		BinomialHeap newBinomialHeap = new BinomialHeap(new_node, new_node, 1);
@@ -228,8 +229,217 @@ public class BinomialHeap
 	 */
 	public void meld(BinomialHeap heap2)
 	{
-		return; // should be replaced by student code   		
+		//melding 1 and 1 doesn't work
+		this.size += heap2.size;
+		BinomialHeap bigger_heap, smaller_heap;
+		HeapNode b_node,s_node,b_next,s_next, remainder = null;
+		int exp = 0;
+
+		if (this.last.rank >= heap2.last.rank)
+		{
+			bigger_heap = this;
+			smaller_heap = heap2;
+		}
+		else
+		{
+			smaller_heap = this;
+			bigger_heap = heap2;
+		}
+
+		if(bigger_heap.numTrees() == 1 && smaller_heap.numTrees() == 1 && bigger_heap.last.rank == smaller_heap.last.rank)
+		{
+			HeapNode ret = null;
+			two_nodes(bigger_heap.last,smaller_heap.last,ret);
+			this.last = ret;
+		}
+		else {
+			HeapNode ret_node = bigger_heap.last, ret = bigger_heap.last;
+
+
+			b_node = bigger_heap.last.next;
+			s_node = smaller_heap.last.next;
+
+			do {
+				b_next = b_node.next;
+				s_next = s_node.next;
+				switch (which_case(b_node, s_node, remainder, exp)) {
+					case 1:
+						break;
+					case 2:
+						one_node(b_node, ret_node);
+						break;
+					case 3:
+						one_node(s_node, ret_node);
+						break;
+					case 4:
+						one_node(remainder, ret_node);
+						remainder = null;
+						break;
+					case 5:
+						two_nodes(b_node, s_node, remainder);
+						b_node = b_next;
+						s_node = s_next;
+						break;
+					case 6:
+						two_nodes(b_node, remainder, remainder);
+						b_node = b_next;
+						break;
+					case 7:
+						two_nodes(s_node, remainder, remainder);
+						s_node = s_next;
+						break;
+					case 8:
+						three_nodes(b_node, s_node, remainder, ret_node);
+						b_node = b_next;
+						s_node = s_next;
+						break;
+
+				}
+
+				exp++;
+			} while (s_node.rank >= exp && s_node.next != s_node);
+
+			if (remainder != null) {
+				while (remainder.rank == b_node.rank) {
+					b_next = b_node.next;
+					two_nodes(b_node, remainder, remainder);
+					b_node = b_next;
+				}
+				one_node(remainder, ret_node);
+			}
+			//what if ret_node is last?
+			ret_node.next = b_node;
+
+			//todo: close the loop of ret_node.
+			if (ret_node.child == ret) {
+				this.last = ret_node;
+			} else {
+				this.last = ret;
+			}
+		}
+		this.min = this.findMin().node;
 	}
+
+	private int which_case(HeapNode b_node, HeapNode s_node, HeapNode remainder , int exp) {
+		if (b_node.rank == exp) {
+			if (s_node.rank == exp) {
+				if (remainder != null) {
+					return 8;
+				} else {
+					return 5;
+				}
+			} else {
+				if (remainder != null) {
+					return 6;
+				} else {
+					return 2;
+				}
+			}
+		} else {
+			if (s_node.rank == exp) {
+				if (remainder != null) {
+					return 7;
+				} else {
+					return 3;
+				}
+			} else {
+				if (remainder != null) {
+					return 4;
+				} else {
+					return 1;
+				}
+			}
+		}
+	}
+
+	private HeapNode[] check_which_nodes_to_concatenate(HeapNode b_node, HeapNode s_node, HeapNode remainder){
+		HeapNode[] ret = {b_node,s_node,remainder};
+		if (s_node.item.key < b_node.item.key && s_node.item.key < remainder.item.key)
+		{
+			ret[0] = s_node;
+			ret[1] = b_node;
+		}
+		if (s_node.item.key < b_node.item.key && s_node.item.key < remainder.item.key)
+		{
+			ret[0] = remainder;
+			ret[2] = b_node;
+		}
+
+		return ret;
+	}
+
+
+	private void one_node(HeapNode node, HeapNode ret_node)
+	{
+			ret_node.next = node;
+			ret_node = ret_node.next;
+			node = node.next;
+	}
+
+	private void two_nodes(HeapNode node1,HeapNode node2 ,HeapNode remainder)
+	{
+		if (node1.item.key <= node2.item.key)
+		{
+			node1.concatenate(node2);
+			remainder = node1;
+		}
+		else
+		{
+			node2.concatenate(node1);
+			remainder = node2;
+		}
+		remainder.rank++;
+	}
+
+	private void three_nodes(HeapNode b_node, HeapNode s_node, HeapNode remainder, HeapNode ret_node)
+	{
+		HeapNode[] cwntc = check_which_nodes_to_concatenate(b_node, s_node, remainder);
+		ret_node.next = cwntc[0];
+		ret_node = ret_node.next;
+		two_nodes(cwntc[1],cwntc[2],remainder);
+	}
+
+
+	private void check_remainder(HeapNode this_node, HeapNode heap2_next) {
+
+		HeapNode this_next = this_node.next;
+
+		while ((this_node.next.rank == this_node.next.next.rank &&
+				this_node.next.rank != heap2_next.rank)
+				|| (this_node.next.rank != this_node.next.next.rank &&
+				this_node.next.rank == heap2_next.rank)) {
+
+			if (this_node.next.rank == this_node.next.next.rank)
+			{
+				if (this_node == this_node.next){break;}
+				merge_remainder(this_node, this_node.next, false);
+			}
+			else
+			{
+				merge_remainder(this_node, heap2_next, true);
+			}
+		}
+	}
+
+	private void merge_remainder(HeapNode this_node, HeapNode other_node, boolean are_we_on_heap_2)
+	{
+		HeapNode other_next = other_node.next;
+
+		if (this_node.next.item.key <= other_node.item.key)
+		{
+			this_node.next.concatenate(other_node);
+		}
+		else
+		{
+			HeapNode this_next = this_node.next;
+			if (are_we_on_heap_2)
+			{other_node.next = this_node.next.next;} // problematic
+			other_node.concatenate(this_next);
+			this_node.next = other_node;
+		}
+		other_node = other_next;
+	}
+
 
 	/**
 	 * 
@@ -287,6 +497,17 @@ public class BinomialHeap
 			this.next = next;
 			this.parent = parent;
 			this.rank = rank;
+		}
+		protected void concatenate(HeapNode node2)
+		{
+			if (this.rank != 0)
+			{
+				node2.next = this.child.next;
+				this.child.next = node2;
+			}
+			this.child = node2;
+			node2.parent = this;
+			this.rank++;
 		}
 		public String toString() {
 			return "<" + String.valueOf(item.key) + ">";
