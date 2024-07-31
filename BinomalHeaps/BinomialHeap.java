@@ -169,7 +169,8 @@ public class BinomialHeap
 
 	public void meld(BinomialHeap heap2)
 	{
-		//todo: melding,assigning min and last
+		//melding 1 and 1 doesn't work
+		this.size += heap2.size;
 		BinomialHeap bigger_heap, smaller_heap;
 		HeapNode b_node,s_node,b_next,s_next, remainder = null;
 		int exp = 0;
@@ -185,66 +186,78 @@ public class BinomialHeap
 			bigger_heap = heap2;
 		}
 
-		HeapNode ret_node = new HeapNode(bigger_heap.last.item,bigger_heap.last.child,
-				null,null,bigger_heap.last.rank);
-
-		b_node = bigger_heap.last.next;
-		s_node = smaller_heap.last.next;
-
-		do {
-			b_next = b_node.next;
-			s_next = s_node.next;
-			switch (which_case(b_node,s_node,remainder,exp)){
-				case 1:
-					break;
-				case 2:
-					one_node(b_node,ret_node);
-					break;
-				case 3:
-					one_node(s_node,ret_node);
-					break;
-				case 4:
-					one_node(remainder,ret_node);
-					remainder = null;
-					break;
-				case 5:
-					two_nodes(b_node,s_node,remainder);
-					b_node = b_next;
-					s_node = s_next;
-					break;
-				case 6:
-					two_nodes(b_node,remainder,remainder);
-					b_node = b_next;
-					break;
-				case 7:
-					two_nodes(s_node,remainder,remainder);
-					s_node = s_next;
-					break;
-				case 8:
-					three_nodes(b_node,s_node,remainder,ret_node);
-					b_node = b_next;
-					s_node = s_next;
-					break;
-
-			}
-
-			exp++;
-		} while (s_node != smaller_heap.last.next);
-
-		if (remainder != null) {
-			while (remainder.rank == b_node.rank) {
-				b_next = b_node.next;
-				two_nodes(b_node, remainder, remainder);
-				b_node = b_next;
-			}
-			one_node(remainder,ret_node);
+		if(bigger_heap.numTrees() == 1 && smaller_heap.numTrees() == 1 && bigger_heap.last.rank == smaller_heap.last.rank)
+		{
+			HeapNode ret = null;
+			two_nodes(bigger_heap.last,smaller_heap.last,ret);
+			this.last = ret;
 		}
-		//what if ret_node is last?
-		ret_node.next = b_node;
+		else {
+			HeapNode ret_node = bigger_heap.last, ret = bigger_heap.last;
 
-		//todo: close the loop of ret_node.
 
-		this.last = ret_node;
+			b_node = bigger_heap.last.next;
+			s_node = smaller_heap.last.next;
+
+			do {
+				b_next = b_node.next;
+				s_next = s_node.next;
+				switch (which_case(b_node, s_node, remainder, exp)) {
+					case 1:
+						break;
+					case 2:
+						one_node(b_node, ret_node);
+						break;
+					case 3:
+						one_node(s_node, ret_node);
+						break;
+					case 4:
+						one_node(remainder, ret_node);
+						remainder = null;
+						break;
+					case 5:
+						two_nodes(b_node, s_node, remainder);
+						b_node = b_next;
+						s_node = s_next;
+						break;
+					case 6:
+						two_nodes(b_node, remainder, remainder);
+						b_node = b_next;
+						break;
+					case 7:
+						two_nodes(s_node, remainder, remainder);
+						s_node = s_next;
+						break;
+					case 8:
+						three_nodes(b_node, s_node, remainder, ret_node);
+						b_node = b_next;
+						s_node = s_next;
+						break;
+
+				}
+
+				exp++;
+			} while (s_node.rank >= exp && s_node.next != s_node);
+
+			if (remainder != null) {
+				while (remainder.rank == b_node.rank) {
+					b_next = b_node.next;
+					two_nodes(b_node, remainder, remainder);
+					b_node = b_next;
+				}
+				one_node(remainder, ret_node);
+			}
+			//what if ret_node is last?
+			ret_node.next = b_node;
+
+			//todo: close the loop of ret_node.
+			if (ret_node.child == ret) {
+				this.last = ret_node;
+			} else {
+				this.last = ret;
+			}
+		}
+		this.min = this.findMin().node;
 	}
 
 	private int which_case(HeapNode b_node, HeapNode s_node, HeapNode remainder , int exp) {
@@ -298,9 +311,9 @@ public class BinomialHeap
 
 	private void one_node(HeapNode node, HeapNode ret_node)
 	{
-		ret_node.next = node;
-		ret_node = ret_node.next;
-		node = node.next;
+			ret_node.next = node;
+			ret_node = ret_node.next;
+			node = node.next;
 	}
 
 	private void two_nodes(HeapNode node1,HeapNode node2 ,HeapNode remainder)
@@ -315,6 +328,7 @@ public class BinomialHeap
 			node2.concatenate(node1);
 			remainder = node2;
 		}
+		remainder.rank++;
 	}
 
 	private void three_nodes(HeapNode b_node, HeapNode s_node, HeapNode remainder, HeapNode ret_node)
