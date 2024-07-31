@@ -27,6 +27,40 @@ public class BinomialHeap
 	 * Insert (key,info) into the heap and return the newly generated HeapItem.
 	 *
 	 */
+	public String toString() {
+		if (this.last == null) return "ERROR - LAST IS NULL";
+		HeapNode N = this.last.next;
+		boolean fin = false;
+		String res = "";
+		if (this.last.next == null) return "ERROR - NO LAST'S .NEXT FIELD";
+		while(N != this.last.next || !fin) {
+			HeapNode goDown = N;
+			res += "{ --" + N.toString() + "--";
+			if (N.child == null) { 
+				res += " }    ";
+				N = N.next;
+				fin = true;
+				continue;
+			}
+			goDown = goDown.child;
+			while(goDown != null) {
+				res += " | ";
+				HeapNode checkKids = goDown;
+				boolean fin2 = false;
+				while (checkKids != goDown || !fin2) {
+					res += "" + checkKids.toString() + "";
+					checkKids = checkKids.next;
+					fin2 = true;
+				}
+				goDown = goDown.child;
+			}
+		    res += " }    ";
+			N = N.next;
+			fin = true;
+		}
+		return res;
+		
+	}
 	public HeapItem insert(int key, String info)
 
 	{
@@ -284,14 +318,5 @@ public class BinomialHeap
 					+ ", parent:" + ((node.parent == null) ? "null" : node.parent)
 					+ ", rank:" + node.rank + "}";
 		}
-	}
-	
-	public static void main(String[] args) {
-		BinomialHeap b = new BinomialHeap();
-		///HeapItem i = new HeapItem(3, "hello");
-		///HeapNode g = new HeapNode(i, null, null, null, 0);
-		///HeapNode n = new HeapNode(i, null, g, null, 0);
-		///i.setNode(n);
-		///System.out.println(i);
 	}
 }
