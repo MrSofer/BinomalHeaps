@@ -105,12 +105,9 @@ public class BinomialHeap
 	 * Meld the heap with heap2
 	 *
 	 */
-	public void meld(BinomialHeap heap2)
-	/*
+	/*public void meld(BinomialHeap heap2)
 	take into account:
 	size1 can be bigger smaller or equals to size2
-
-	 */
 
 	{
 		this.size += heap2.size;
@@ -168,7 +165,166 @@ public class BinomialHeap
 		HeapItem min_item = this.findMin();
 		this.min = min_item.node;
 
+	}*/
+
+	public void meld(BinomialHeap heap2)
+	{
+		//todo: melding,assigning min and last
+		BinomialHeap bigger_heap, smaller_heap;
+		HeapNode b_node,s_node,b_next,s_next, remainder = null;
+		int exp = 0;
+
+		if (this.last.rank >= heap2.last.rank)
+		{
+			bigger_heap = this;
+			smaller_heap = heap2;
+		}
+		else
+		{
+			smaller_heap = this;
+			bigger_heap = heap2;
+		}
+
+		HeapNode ret_node = new HeapNode(bigger_heap.last.item,bigger_heap.last.child,
+				null,null,bigger_heap.last.rank);
+
+		b_node = bigger_heap.last.next;
+		s_node = smaller_heap.last.next;
+
+		do {
+			b_next = b_node.next;
+			s_next = s_node.next;
+			switch (which_case(b_node,s_node,remainder,exp)){
+				case 1:
+					break;
+				case 2:
+					one_node(b_node,ret_node);
+					break;
+				case 3:
+					one_node(s_node,ret_node);
+					break;
+				case 4:
+					one_node(remainder,ret_node);
+					remainder = null;
+					break;
+				case 5:
+					two_nodes(b_node,s_node,remainder);
+					b_node = b_next;
+					s_node = s_next;
+					break;
+				case 6:
+					two_nodes(b_node,remainder,remainder);
+					b_node = b_next;
+					break;
+				case 7:
+					two_nodes(s_node,remainder,remainder);
+					s_node = s_next;
+					break;
+				case 8:
+					three_nodes(b_node,s_node,remainder,ret_node);
+					b_node = b_next;
+					s_node = s_next;
+					break;
+
+			}
+
+			exp++;
+		} while (s_node != smaller_heap.last.next);
+
+		if (remainder != null) {
+			while (remainder.rank == b_node.rank) {
+				b_next = b_node.next;
+				two_nodes(b_node, remainder, remainder);
+				b_node = b_next;
+			}
+			one_node(remainder,ret_node);
+		}
+		//what if ret_node is last?
+		ret_node.next = b_node;
+
+		//todo: close the loop of ret_node.
+
+		this.last = ret_node;
 	}
+
+	private int which_case(HeapNode b_node, HeapNode s_node, HeapNode remainder , int exp) {
+		if (b_node.rank == exp) {
+			if (s_node.rank == exp) {
+				if (remainder != null) {
+					return 8;
+				} else {
+					return 5;
+				}
+			} else {
+				if (remainder != null) {
+					return 6;
+				} else {
+					return 2;
+				}
+			}
+		} else {
+			if (s_node.rank == exp) {
+				if (remainder != null) {
+					return 7;
+				} else {
+					return 3;
+				}
+			} else {
+				if (remainder != null) {
+					return 4;
+				} else {
+					return 1;
+				}
+			}
+		}
+	}
+
+	private HeapNode[] check_which_nodes_to_concatenate(HeapNode b_node, HeapNode s_node, HeapNode remainder){
+		HeapNode[] ret = {b_node,s_node,remainder};
+		if (s_node.item.key < b_node.item.key && s_node.item.key < remainder.item.key)
+		{
+			ret[0] = s_node;
+			ret[1] = b_node;
+		}
+		if (s_node.item.key < b_node.item.key && s_node.item.key < remainder.item.key)
+		{
+			ret[0] = remainder;
+			ret[2] = b_node;
+		}
+
+		return ret;
+	}
+
+
+	private void one_node(HeapNode node, HeapNode ret_node)
+	{
+		ret_node.next = node;
+		ret_node = ret_node.next;
+		node = node.next;
+	}
+
+	private void two_nodes(HeapNode node1,HeapNode node2 ,HeapNode remainder)
+	{
+		if (node1.item.key <= node2.item.key)
+		{
+			node1.concatenate(node2);
+			remainder = node1;
+		}
+		else
+		{
+			node2.concatenate(node1);
+			remainder = node2;
+		}
+	}
+
+	private void three_nodes(HeapNode b_node, HeapNode s_node, HeapNode remainder, HeapNode ret_node)
+	{
+		HeapNode[] cwntc = check_which_nodes_to_concatenate(b_node, s_node, remainder);
+		ret_node.next = cwntc[0];
+		ret_node = ret_node.next;
+		two_nodes(cwntc[1],cwntc[2],remainder);
+	}
+
 
 	private void check_remainder(HeapNode this_node, HeapNode heap2_next) {
 
