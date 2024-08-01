@@ -17,44 +17,47 @@ public class BinomialHeap
 	 * Insert (key,info) into the heap and return the newly generated HeapItem.
 	 *
 	 */
+	public BinomialHeap() {
+		this.size = 0;
+		this.last = null;
+		this.min = null;
+	}
+
+	public BinomialHeap(HeapNode last, HeapNode min, int size) {
+		this.size = size;
+		this.last = last;
+		this.min = min;
+	}
 	public HeapItem insert(int key, String info)
 
 	{
 		HeapItem new_item = new HeapItem(key, info);
-		HeapNode new_node = new HeapNode(new_item,null,null,null,1);
-		if (empty()) {
-
+		HeapNode new_node;
+		if (this.empty()) {
+			new_node = new HeapNode(new_item, null, null, null, 0);
+			new_node.next = new_node;
 			new_item.setNode(new_node);
+			this.size++;
+			this.min = new_node;
+			this.last = new_node;
+			return new_item;
+		}
+		if (this.size%2 == 0) {
+			new_node = new HeapNode(new_item, null, this.last.next, null, 0);
+			this.last.next = new_node;
+			new_item.setNode(new_node);
+			this.size ++;
+			if(new_item.key < this.min.item.key) this.min = new_node;
 			return new_item;
 		}
 
-		int i = this.size;
-		if(i%2 == 0) {
-			HeapItem item = new HeapItem(key, info);
-			HeapNode node = new HeapNode(item, null, last.next, null, 1);
-			last.next = node;
-			item.setNode(node);
-			this.size ++;
-			return item;
-		}
+		new_node = new HeapNode(new_item, null, this.last.next, null, 0);// node.next will be the lonely subtree
+		new_item.setNode(new_node);
 
-		HeapItem item = new HeapItem(key, info);
-		HeapNode node = new HeapNode(item, null, last.next, null, 1); // node.next will be the lonely subtree
-		item.setNode(node);
+		BinomialHeap newBinomialHeap = new BinomialHeap(new_node, new_node, 1);
+		this.meld(newBinomialHeap);
 
-		int s = this.size;
-		int exp = 0;
-		while(s%2 == 1) {
-			s /= 2;
-			if (node.next.getAmountOfChildren() == Math.pow(2, exp)) {
-
-			}
-			exp ++;
-
-		}
-
-		this.size++;
-		return item; // should be replaced by student code
+		return new_item;
 	}
 
 	/**
@@ -75,8 +78,18 @@ public class BinomialHeap
 	 */
 	public HeapItem findMin()
 	{
-		return null; // should be replaced by student code
-	} 
+		if (empty()) return null;
+		HeapNode tmp = last.next;
+		HeapNode minimum = last;
+		while (tmp != last) {
+			if (tmp.item.key < minimum.item.key) {
+				minimum = tmp;
+			}
+			tmp = tmp.next;
+		}
+		return minimum.item;
+	}
+
 
 	/**
 	 * 
@@ -189,7 +202,7 @@ public class BinomialHeap
 		if(bigger_heap.numTrees() == 1 && smaller_heap.numTrees() == 1 && bigger_heap.last.rank == smaller_heap.last.rank)
 		{
 			HeapNode ret = null;
-			two_nodes(bigger_heap.last,smaller_heap.last,ret);
+			ret = two_nodes(bigger_heap.last,smaller_heap.last,ret);
 			this.last = ret;
 		}
 		else {
@@ -216,16 +229,16 @@ public class BinomialHeap
 						remainder = null;
 						break;
 					case 5:
-						two_nodes(b_node, s_node, remainder);
+						remainder = two_nodes(b_node, s_node, remainder);
 						b_node = b_next;
 						s_node = s_next;
 						break;
 					case 6:
-						two_nodes(b_node, remainder, remainder);
+						remainder = two_nodes(b_node, remainder, remainder);
 						b_node = b_next;
 						break;
 					case 7:
-						two_nodes(s_node, remainder, remainder);
+						remainder = two_nodes(s_node, remainder, remainder);
 						s_node = s_next;
 						break;
 					case 8:
@@ -240,6 +253,7 @@ public class BinomialHeap
 			} while (s_node.rank >= exp && s_node.next != s_node);
 
 			if (remainder != null) {
+				System.out.println(remainder.item.key);
 				while (remainder.rank == b_node.rank) {
 					b_next = b_node.next;
 					two_nodes(b_node, remainder, remainder);
@@ -316,7 +330,7 @@ public class BinomialHeap
 			node = node.next;
 	}
 
-	private void two_nodes(HeapNode node1,HeapNode node2 ,HeapNode remainder)
+	private HeapNode two_nodes(HeapNode node1,HeapNode node2 ,HeapNode remainder)
 	{
 		if (node1.item.key <= node2.item.key)
 		{
@@ -329,6 +343,7 @@ public class BinomialHeap
 			remainder = node2;
 		}
 		remainder.rank++;
+		return remainder;
 	}
 
 	private void three_nodes(HeapNode b_node, HeapNode s_node, HeapNode remainder, HeapNode ret_node)
@@ -336,30 +351,30 @@ public class BinomialHeap
 		HeapNode[] cwntc = check_which_nodes_to_concatenate(b_node, s_node, remainder);
 		ret_node.next = cwntc[0];
 		ret_node = ret_node.next;
-		two_nodes(cwntc[1],cwntc[2],remainder);
+		remainder = two_nodes(cwntc[1],cwntc[2],remainder);
 	}
 
 
-	private void check_remainder(HeapNode this_node, HeapNode heap2_next) {
-
-		HeapNode this_next = this_node.next;
-
-		while ((this_node.next.rank == this_node.next.next.rank &&
-				this_node.next.rank != heap2_next.rank)
-				|| (this_node.next.rank != this_node.next.next.rank &&
-				this_node.next.rank == heap2_next.rank)) {
-
-			if (this_node.next.rank == this_node.next.next.rank)
-			{
-				if (this_node == this_node.next){break;}
-				merge_remainder(this_node, this_node.next, false);
-			}
-			else
-			{
-				merge_remainder(this_node, heap2_next, true);
-			}
-		}
-	}
+//	private void check_remainder(HeapNode this_node, HeapNode heap2_next) {
+//
+//		HeapNode this_next = this_node.next;
+//
+//		while ((this_node.next.rank == this_node.next.next.rank &&
+//				this_node.next.rank != heap2_next.rank)
+//				|| (this_node.next.rank != this_node.next.next.rank &&
+//				this_node.next.rank == heap2_next.rank)) {
+//
+//			if (this_node.next.rank == this_node.next.next.rank)
+//			{
+//				if (this_node == this_node.next){break;}
+//				merge_remainder(this_node, this_node.next, false);
+//			}
+//			else
+//			{
+//				merge_remainder(this_node, heap2_next, true);
+//			}
+//		}
+//	}
 
 	private void merge_remainder(HeapNode this_node, HeapNode other_node, boolean are_we_on_heap_2)
 	{
@@ -468,5 +483,20 @@ public class BinomialHeap
 		public void setNode(HeapNode node){
 			this.node = node;
 		}
+	}
+
+	public static void main(String[] args)
+	{
+		BinomialHeap b = new BinomialHeap();
+		HeapItem i = new HeapItem(3,"3");
+		b.last = new HeapNode(i,null,null,null,0);
+		b.last.item = i;
+		b.last.next = b.last;
+		b.size++;
+		b.insert(4,"4");
+		b.insert(5,"5");
+		System.out.println(b.last.item.key);
+		System.out.print(b.last.child.item.key);
+		System.out.print(b.last.next.item.key);
 	}
 }
