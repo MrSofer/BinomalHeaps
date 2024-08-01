@@ -87,6 +87,7 @@ public class BinomialHeap
 			}
 			tmp = tmp.next;
 		}
+		minimum.item.node = minimum;
 		return minimum.item;
 	}
 
@@ -290,7 +291,8 @@ public class BinomialHeap
 			this.last = ret;
 
 		}
-		this.min = this.findMin().node;
+		HeapItem f_min = this.findMin();
+		this.min = f_min.node;
 	}
 
 	private int which_case(HeapNode b_node, HeapNode s_node, HeapNode remainder , int exp) {
@@ -353,13 +355,11 @@ public class BinomialHeap
 	{
 		if (node1.item.key <= node2.item.key)
 		{
-			node1.rank++;
 			node1.concatenate(node2);
 			return node1;
 		}
 		else
 		{
-			node2.rank++;
 			node2.concatenate(node1);
 			return node2;
 		}
