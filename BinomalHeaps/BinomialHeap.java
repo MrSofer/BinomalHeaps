@@ -202,11 +202,13 @@ public class BinomialHeap
 		if(bigger_heap.numTrees() == 1 && smaller_heap.numTrees() == 1 && bigger_heap.last.rank == smaller_heap.last.rank)
 		{
 			HeapNode ret = null;
-			ret = two_nodes(bigger_heap.last,smaller_heap.last,ret);
+			ret = two_nodes(bigger_heap.last,smaller_heap.last);
 			this.last = ret;
 		}
 		else {
-			HeapNode ret_node = bigger_heap.last, ret = bigger_heap.last;
+			HeapNode ret;
+			HeapNode[] ret_arr = new HeapNode[bigger_heap.last.rank + 1];
+			HeapNode[] iii_nodes;
 
 
 			b_node = bigger_heap.last.next;
@@ -219,30 +221,32 @@ public class BinomialHeap
 					case 1:
 						break;
 					case 2:
-						one_node(b_node, ret_node);
+						ret_arr[exp] = b_node;
 						break;
 					case 3:
-						one_node(s_node, ret_node);
+						ret_arr[exp] = s_node;
 						break;
 					case 4:
-						one_node(remainder, ret_node);
+						ret_arr[exp] = remainder;
 						remainder = null;
 						break;
 					case 5:
-						remainder = two_nodes(b_node, s_node, remainder);
+						remainder = two_nodes(b_node, s_node);
 						b_node = b_next;
 						s_node = s_next;
 						break;
 					case 6:
-						remainder = two_nodes(b_node, remainder, remainder);
+						remainder = two_nodes(b_node, remainder);
 						b_node = b_next;
 						break;
 					case 7:
-						remainder = two_nodes(s_node, remainder, remainder);
+						remainder = two_nodes(s_node, remainder);
 						s_node = s_next;
 						break;
 					case 8:
-						three_nodes(b_node, s_node, remainder, ret_node);
+						iii_nodes = three_nodes(b_node, s_node, remainder);
+						ret_arr[exp] = iii_nodes[0];
+						remainder = iii_nodes[1];
 						b_node = b_next;
 						s_node = s_next;
 						break;
@@ -256,20 +260,35 @@ public class BinomialHeap
 				System.out.println(remainder.item.key);
 				while (remainder.rank == b_node.rank) {
 					b_next = b_node.next;
-					two_nodes(b_node, remainder, remainder);
+					remainder = two_nodes(b_node, remainder);
 					b_node = b_next;
+					exp++;
 				}
-				one_node(remainder, ret_node);
+				ret_arr[exp] = remainder;
 			}
-			//what if ret_node is last?
-			ret_node.next = b_node;
 
-			//todo: close the loop of ret_node.
-			if (ret_node.child == ret) {
-				this.last = ret_node;
-			} else {
-				this.last = ret;
+			while(exp < ret_arr.length)
+			{
+				if (b_node.rank == exp){
+					ret_arr[exp] = b_node;
+					b_node = b_node.next;
+				}
 			}
+
+			while (ret_arr[exp] == null) {exp--;}
+			ret = ret_arr[exp];
+			exp = 0;
+			while(exp < ret_arr.length)
+			{
+				while (ret_arr[exp] == null && exp < ret_arr.length) {exp++;}
+				if (exp < ret_arr.length)
+				{
+					ret.next = ret_arr[exp];
+					ret = ret.next;
+				}
+			}
+			this.last = ret;
+
 		}
 		this.min = this.findMin().node;
 	}
@@ -330,28 +349,29 @@ public class BinomialHeap
 			node = node.next;
 	}
 
-	private HeapNode two_nodes(HeapNode node1,HeapNode node2 ,HeapNode remainder)
+	private HeapNode two_nodes(HeapNode node1,HeapNode node2)
 	{
 		if (node1.item.key <= node2.item.key)
 		{
+			node1.rank++;
 			node1.concatenate(node2);
-			remainder = node1;
+			return node1;
 		}
 		else
 		{
+			node2.rank++;
 			node2.concatenate(node1);
-			remainder = node2;
+			return node2;
 		}
-		remainder.rank++;
-		return remainder;
 	}
 
-	private void three_nodes(HeapNode b_node, HeapNode s_node, HeapNode remainder, HeapNode ret_node)
+	private HeapNode[] three_nodes(HeapNode b_node, HeapNode s_node, HeapNode remainder)
 	{
 		HeapNode[] cwntc = check_which_nodes_to_concatenate(b_node, s_node, remainder);
-		ret_node.next = cwntc[0];
-		ret_node = ret_node.next;
-		remainder = two_nodes(cwntc[1],cwntc[2],remainder);
+		HeapNode[] ret = new HeapNode[2];
+		ret[0] = cwntc[0];
+		ret[1] = two_nodes(cwntc[1],cwntc[2]);
+		return ret;
 	}
 
 
