@@ -51,7 +51,8 @@ public class BinomialHeap
 			return new_item;
 		}
 
-		new_node = new HeapNode(new_item, null, this.last.next, null, 0);// node.next will be the lonely subtree
+		new_node = new HeapNode(new_item, null, null, null, 0);
+		new_node.next = new_node;// node.next will be the lonely subtree
 		new_item.setNode(new_node);
 
 		BinomialHeap newBinomialHeap = new BinomialHeap(new_node, new_node, 1);
@@ -119,72 +120,10 @@ public class BinomialHeap
 	 * Meld the heap with heap2
 	 *
 	 */
-	/*public void meld(BinomialHeap heap2)
-	take into account:
-	size1 can be bigger smaller or equals to size2
-
-	{
-		this.size += heap2.size;
-
-		HeapNode this_node = this.last;
-		HeapNode heap2_node = heap2.last.next;
-		HeapNode im_back = heap2.last.next;
-		HeapNode this_next, heap2_next;
-
-		do // remember we may need to meld a single node to another heap, remember the idea of a first entry pass
-		{
-
-			if (this_node.next.rank > heap2_node.rank)
-			{
-				this_next = this_node.next;
-				this_node.next = heap2_node;
-
-				while (heap2_node.next.rank < this_next.rank)
-				{
-					heap2_node = heap2_node.next;
-				}
-
-				heap2_next = heap2_node.next;
-				heap2_node.next = this_next;
-				this_node = heap2_node;
-				heap2_node = heap2_next;
-			} else if (this_node.next.rank == heap2_node.rank)
-			{
-				heap2_next = heap2_node.next;
-				if (this_node.next.item.key <= heap2_node.item.key)
-				{
-					this_node.next.concatenate(heap2_node);
-					check_remainder(this_node, heap2_next);
-                }
-				else
-				{
-					this_next = this_node.next;
-					this_node.next = heap2_node;
-					heap2_node.next = this_next.next;
-					heap2_node.concatenate(this_next);
-					check_remainder(this_node, heap2_next);
-                }
-				this_node = this_node.next;
-                heap2_node = heap2_next;
-
-
-            }
-			else{this_node = this_node.next;}
-
-		}while (this_node != this.last && this_node.child != this.last
-				&& heap2_node != im_back && heap2_node.child != im_back);
-
-		if (this_node.child == this.last){this.last = this_node;}
-
-		HeapItem min_item = this.findMin();
-		this.min = min_item.node;
-
-	}*/
 
 	public void meld(BinomialHeap heap2)
 	{
 		//melding 1 and 1 doesn't work
-		this.size += heap2.size;
 		BinomialHeap bigger_heap, smaller_heap;
 		HeapNode b_node,s_node,b_next,s_next, remainder = null;
 		int exp = 0;
@@ -199,6 +138,7 @@ public class BinomialHeap
 			smaller_heap = this;
 			bigger_heap = heap2;
 		}
+		this.size += heap2.size;
 
 		if(bigger_heap.numTrees() == 1 && smaller_heap.numTrees() == 1 && bigger_heap.last.rank == smaller_heap.last.rank)
 		{
@@ -208,7 +148,7 @@ public class BinomialHeap
 		}
 		else {
 			HeapNode ret;
-			HeapNode[] ret_arr = new HeapNode[bigger_heap.last.rank + 1];
+			HeapNode[] ret_arr = new HeapNode[bigger_heap.last.rank + 2];
 			HeapNode[] iii_nodes;
 
 
@@ -268,21 +208,22 @@ public class BinomialHeap
 				ret_arr[exp] = remainder;
 			}
 
-			while(exp < ret_arr.length)
+			while(exp < ret_arr.length-1)
 			{
 				if (b_node.rank == exp){
 					ret_arr[exp] = b_node;
 					b_node = b_node.next;
 				}
+				exp++;
 			}
 
 			while (ret_arr[exp] == null) {exp--;}
 			ret = ret_arr[exp];
 			exp = 0;
-			while(exp < ret_arr.length)
+			while(exp < ret_arr.length-1)
 			{
-				while (ret_arr[exp] == null && exp < ret_arr.length) {exp++;}
-				if (exp < ret_arr.length)
+				while (ret_arr[exp] == null && exp < ret_arr.length-1) {exp++;}
+				if (exp < ret_arr.length-1)
 				{
 					ret.next = ret_arr[exp];
 					ret = ret.next;
@@ -375,46 +316,6 @@ public class BinomialHeap
 	}
 
 
-//	private void check_remainder(HeapNode this_node, HeapNode heap2_next) {
-//
-//		HeapNode this_next = this_node.next;
-//
-//		while ((this_node.next.rank == this_node.next.next.rank &&
-//				this_node.next.rank != heap2_next.rank)
-//				|| (this_node.next.rank != this_node.next.next.rank &&
-//				this_node.next.rank == heap2_next.rank)) {
-//
-//			if (this_node.next.rank == this_node.next.next.rank)
-//			{
-//				if (this_node == this_node.next){break;}
-//				merge_remainder(this_node, this_node.next, false);
-//			}
-//			else
-//			{
-//				merge_remainder(this_node, heap2_next, true);
-//			}
-//		}
-//	}
-
-	private void merge_remainder(HeapNode this_node, HeapNode other_node, boolean are_we_on_heap_2)
-	{
-		HeapNode other_next = other_node.next;
-
-		if (this_node.next.item.key <= other_node.item.key)
-		{
-			this_node.next.concatenate(other_node);
-		}
-		else
-		{
-			HeapNode this_next = this_node.next;
-			if (are_we_on_heap_2)
-			{other_node.next = this_node.next.next;} // problematic
-			other_node.concatenate(this_next);
-			this_node.next = other_node;
-		}
-		other_node = other_next;
-	}
-
 	/**
 	 * 
 	 * Return the number of elements in the heap
@@ -480,7 +381,8 @@ public class BinomialHeap
 				this.child.next = node2;
 			}
 			this.child = node2;
-			node2.parent = this;
+			this.child.parent = this;
+			this.next = this;
 			this.rank++;
 		}
 
@@ -515,8 +417,15 @@ public class BinomialHeap
 		b.size++;
 		b.insert(4,"4");
 		b.insert(5,"5");
-		System.out.println(b.last.item.key);
-		System.out.print(b.last.child.item.key);
-		System.out.print(b.last.next.item.key);
+		b.insert(6,"6");
+		System.out.println(b.numTrees());
+		System.out.println("root is: " + b.last.item.key);
+		System.out.println("root next (should be itself) is: " + b.last.next.item.key);
+		System.out.println("root child is: " + b.last.child.item.key);
+		System.out.println("root child next is: " + b.last.child.next.item.key);
+		System.out.println("root child next next (should be itself) is: " + b.last.child.next.next.item.key);
+		System.out.println("root child child is: " + b.last.child.child.item.key);
+		System.out.println("root child child next (should be itself) is: " + b.last.child.child.next.item.key);
+
 	}
 }
