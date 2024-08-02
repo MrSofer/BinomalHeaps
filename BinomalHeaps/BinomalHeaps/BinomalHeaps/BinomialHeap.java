@@ -59,6 +59,7 @@ public class BinomialHeap
 		result += "}";
 		return result;
 	}
+	
 	public HeapItem insert(int key, String info)
 
 	{
@@ -152,6 +153,7 @@ public class BinomialHeap
 				}
 				kid = kid.next;
 			}	
+			this.size -= (int)(Math.pow(2,n.child.rank + 1) - 1);
 			BinomialHeap b = new BinomialHeap(n.child, minimum, (int)(Math.pow(2,n.child.rank + 1) - 1));
 			this.meld(b);
 		}
