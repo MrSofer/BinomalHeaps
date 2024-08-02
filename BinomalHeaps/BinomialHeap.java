@@ -28,6 +28,42 @@ public class BinomialHeap
 		this.last = last;
 		this.min = min;
 	}
+
+	public String toString() {
+		if (this.last == null) return "ERROR - LAST IS NULL";
+		HeapNode N = this.last.next;
+		boolean fin = false;
+		String res = "";
+		if (this.last.next == null) return "ERROR - NO LAST'S .NEXT FIELD";
+		while(N != this.last.next || !fin) {
+			HeapNode goDown = N;
+			res += "{ --" + N.toString() + "--";
+			if (N.child == null) {
+				res += " }    ";
+				N = N.next;
+				fin = true;
+				continue;
+			}
+			goDown = goDown.child;
+			while(goDown != null) {
+				res += " | ";
+				HeapNode checkKids = goDown;
+				boolean fin2 = false;
+				while (checkKids != goDown || !fin2) {
+					res += "" + checkKids.toString() + "";
+					checkKids = checkKids.next;
+					fin2 = true;
+				}
+				goDown = goDown.child;
+			}
+			res += " }    ";
+			N = N.next;
+			fin = true;
+		}
+		return res;
+
+	}
+
 	public HeapItem insert(int key, String info)
 
 	{
@@ -123,7 +159,6 @@ public class BinomialHeap
 
 	public void meld(BinomialHeap heap2)
 	{
-		//melding 1 and 1 doesn't work
 		BinomialHeap bigger_heap, smaller_heap;
 		HeapNode b_node,s_node,b_next,s_next, remainder = null;
 		int exp = 0;
@@ -198,10 +233,10 @@ public class BinomialHeap
 			} while (s_node.rank >= exp && s_node.next != s_node);
 
 			if (remainder != null) {
-				System.out.println(remainder.item.key);
 				while (remainder.rank == b_node.rank) {
 					b_next = b_node.next;
 					remainder = two_nodes(b_node, remainder);
+					remainder.next = remainder;
 					b_node = b_next;
 					exp++;
 				}
@@ -227,6 +262,7 @@ public class BinomialHeap
 				{
 					ret.next = ret_arr[exp];
 					ret = ret.next;
+					exp++;
 				}
 			}
 			this.last = ret;
@@ -382,8 +418,11 @@ public class BinomialHeap
 			}
 			this.child = node2;
 			this.child.parent = this;
-			this.next = this;
 			this.rank++;
+		}
+
+		public String toString() {
+			return "<" + String.valueOf(item.key) + ">";
 		}
 
 	}
@@ -405,27 +444,28 @@ public class BinomialHeap
 		public void setNode(HeapNode node){
 			this.node = node;
 		}
+
+		public String toString() {
+			return "Item {key:" + String.valueOf(key) + ", info:" + info
+					+ ", child:" + ((node.child == null) ? "null" : node.child)
+					+ ", next:" + ((node.next == null) ? "null" : node.next)
+					+ ", parent:" + ((node.parent == null) ? "null" : node.parent)
+					+ ", rank:" + node.rank + "}";
+		}
 	}
 
 	public static void main(String[] args)
 	{
 		BinomialHeap b = new BinomialHeap();
-		HeapItem i = new HeapItem(3,"3");
+		HeapItem i = new HeapItem(1,"1");
 		b.last = new HeapNode(i,null,null,null,0);
 		b.last.item = i;
 		b.last.next = b.last;
 		b.size++;
-		b.insert(4,"4");
-		b.insert(5,"5");
-		b.insert(6,"6");
-		System.out.println(b.numTrees());
-		System.out.println("root is: " + b.last.item.key);
-		System.out.println("root next (should be itself) is: " + b.last.next.item.key);
-		System.out.println("root child is: " + b.last.child.item.key);
-		System.out.println("root child next is: " + b.last.child.next.item.key);
-		System.out.println("root child next next (should be itself) is: " + b.last.child.next.next.item.key);
-		System.out.println("root child child is: " + b.last.child.child.item.key);
-		System.out.println("root child child next (should be itself) is: " + b.last.child.child.next.item.key);
-
+		for (int j = 2; j <= 32; j++)
+		{
+			b.insert(j,Integer.toString(j));
+		}
+		System.out.println(b);
 	}
 }
