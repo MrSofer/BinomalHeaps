@@ -27,39 +27,37 @@ public class BinomialHeap
 	 * Insert (key,info) into the heap and return the newly generated HeapItem.
 	 *
 	 */
+
 	public String toString() {
 		if (this.last == null) return "ERROR - LAST IS NULL";
-		HeapNode N = this.last.next;
-		boolean fin = false;
-		String res = "";
 		if (this.last.next == null) return "ERROR - NO LAST'S .NEXT FIELD";
-		while(N != this.last.next || !fin) {
-			HeapNode goDown = N;
-			res += "{ --" + N.toString() + "--";
-			if (N.child == null) { 
-				res += " }    ";
-				N = N.next;
-				fin = true;
-				continue;
-			}
-			goDown = goDown.child;
-			while(goDown != null) {
-				res += " | ";
-				HeapNode checkKids = goDown;
-				boolean fin2 = false;
-				while (checkKids != goDown || !fin2) {
-					res += "" + checkKids.toString() + "";
-					checkKids = checkKids.next;
-					fin2 = true;
-				}
-				goDown = goDown.child;
-			}
-		    res += " }    ";
-			N = N.next;
-			fin = true;
+		HeapNode hobo = this.last.next;
+		String res = "";
+		while (hobo != this.last) {
+			res += "{ --" + hobo.toString() + "--";
+			if (hobo.child != null) res += printChildren(hobo, "");
+			res += " } \n";
+			hobo = hobo.next;
 		}
-		return res;
-		
+		res += "{ --" + hobo.toString() + "--";
+		if (hobo.child != null) res += printChildren(hobo, "");
+		res += " }";
+		return res;	
+	}
+	private String printChildren(HeapNode hobo, String result) {
+		if (hobo == null) return "";
+		if (hobo.child == null) return 	hobo.toString() + "} ";
+		HeapNode new_hobo = hobo.child.next;
+		while (new_hobo != hobo.child) {
+			result += " {" + new_hobo.toString();
+			if (new_hobo.child != null) result += printChildren(new_hobo, "");
+			result += "}";
+			new_hobo = new_hobo.next;
+		}
+		result += " {" + new_hobo.toString();
+		if (new_hobo.child != null) result += printChildren(new_hobo, "");
+		result += "}";
+		return result;
 	}
 	public HeapItem insert(int key, String info)
 
@@ -220,7 +218,7 @@ public class BinomialHeap
 		if (item.key > min.item.key) decreaseKey(item, item.key - this.min.item.key + 1);
 		else decreaseKey(item, item.key - this.min.item.key);
 		deleteMin();
-		return; // should be replaced by student code
+		return;
 	}
 
 	/**
@@ -230,8 +228,6 @@ public class BinomialHeap
 	 */
 	public void meld(BinomialHeap heap2)
 	{
-		//melding 1 and 1 doesn't work
-		this.size += heap2.size;
 		BinomialHeap bigger_heap, smaller_heap;
 		HeapNode b_node,s_node,b_next,s_next, remainder = null;
 		int exp = 0;
@@ -246,6 +242,7 @@ public class BinomialHeap
 			smaller_heap = this;
 			bigger_heap = heap2;
 		}
+		this.size += heap2.size;
 
 		if(bigger_heap.numTrees() == 1 && smaller_heap.numTrees() == 1 && bigger_heap.last.rank == smaller_heap.last.rank)
 		{
@@ -255,7 +252,7 @@ public class BinomialHeap
 		}
 		else {
 			HeapNode ret;
-			HeapNode[] ret_arr = new HeapNode[bigger_heap.last.rank + 1];
+			HeapNode[] ret_arr = new HeapNode[bigger_heap.last.rank + 2];
 			HeapNode[] iii_nodes;
 
 
@@ -305,17 +302,17 @@ public class BinomialHeap
 			} while (s_node.rank >= exp && s_node.next != s_node);
 
 			if (remainder != null) {
-				System.out.println(remainder.item.key);
 				while (remainder.rank == b_node.rank) {
 					b_next = b_node.next;
 					remainder = two_nodes(b_node, remainder);
+					remainder.next = remainder;
 					b_node = b_next;
 					exp++;
 				}
 				ret_arr[exp] = remainder;
 			}
 
-			while(exp < ret_arr.length)
+			while(exp < ret_arr.length-1)
 			{
 				if (b_node.rank == exp){
 					ret_arr[exp] = b_node;
@@ -327,13 +324,14 @@ public class BinomialHeap
 			while (ret_arr[exp] == null) {exp--;}
 			ret = ret_arr[exp];
 			exp = 0;
-			while(exp < ret_arr.length)
+			while(exp < ret_arr.length-1)
 			{
-				while (ret_arr[exp] == null && exp < ret_arr.length) {exp++;}
-				if (exp < ret_arr.length)
+				while (ret_arr[exp] == null && exp < ret_arr.length-1) {exp++;}
+				if (exp < ret_arr.length-1)
 				{
 					ret.next = ret_arr[exp];
 					ret = ret.next;
+					exp++;
 				}
 			}
 			this.last = ret;
@@ -422,46 +420,6 @@ public class BinomialHeap
 		return ret;
 	}
 
-
-//	private void check_remainder(HeapNode this_node, HeapNode heap2_next) {
-//
-//		HeapNode this_next = this_node.next;
-//
-//		while ((this_node.next.rank == this_node.next.next.rank &&
-//				this_node.next.rank != heap2_next.rank)
-//				|| (this_node.next.rank != this_node.next.next.rank &&
-//				this_node.next.rank == heap2_next.rank)) {
-//
-//			if (this_node.next.rank == this_node.next.next.rank)
-//			{
-//				if (this_node == this_node.next){break;}
-//				merge_remainder(this_node, this_node.next, false);
-//			}
-//			else
-//			{
-//				merge_remainder(this_node, heap2_next, true);
-//			}
-//		}
-//	}
-
-	private void merge_remainder(HeapNode this_node, HeapNode other_node, boolean are_we_on_heap_2)
-	{
-		HeapNode other_next = other_node.next;
-
-		if (this_node.next.item.key <= other_node.item.key)
-		{
-			this_node.next.concatenate(other_node);
-		}
-		else
-		{
-			HeapNode this_next = this_node.next;
-			if (are_we_on_heap_2)
-			{other_node.next = this_node.next.next;} // problematic
-			other_node.concatenate(this_next);
-			this_node.next = other_node;
-		}
-		other_node = other_next;
-	}
 
 	/**
 	 * 
