@@ -30,35 +30,45 @@ public class BinomialHeap
 	}
 
 	public String toString() {
-		if (this.last == null) return "ERROR - LAST IS NULL";
-		if (this.last.next == null) return "ERROR - NO LAST'S .NEXT FIELD";
-		HeapNode hobo = this.last.next;
-		String res = "";
-		while (hobo != this.last) {
-			res += "{ --" + hobo.toString() + "--";
-			if (hobo.child != null) res += printChildren(hobo, "");
-			res += " } \n";
-			hobo = hobo.next;
+		if (this.empty()) {
+			return "Heap is empty";
 		}
-		res += "{ --" + hobo.toString() + "--";
-		if (hobo.child != null) res += printChildren(hobo, "");
-		res += " }";
-		return res;
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("BinomialHeap\n");
+
+		BinomialHeap.HeapNode current = this.last;
+		do {
+			if (current != null) {
+				sb.append("Tree with root: ").append(current.toString()).append("\n");
+				appendTree(sb, current, "", true);
+				current = current.next;
+			}
+		} while (current != this.last);
+
+		return sb.toString();
 	}
-	private String printChildren(HeapNode hobo, String result) {
-		if (hobo == null) return "";
-		if (hobo.child == null) return 	hobo.toString() + "} ";
-		HeapNode new_hobo = hobo.child.next;
-		while (new_hobo != hobo.child) {
-			result += " {" + new_hobo.toString();
-			if (new_hobo.child != null) result += printChildren(new_hobo, "");
-			result += "}";
-			new_hobo = new_hobo.next;
+
+	private void appendTree(StringBuilder sb, BinomialHeap.HeapNode node, String indent, boolean last) {
+		if (node == null) return;
+
+		sb.append(indent);
+		if (last) {
+			sb.append("└── ");
+			indent += "    ";
+		} else {
+			sb.append("├── ");
+			indent += "│   ";
 		}
-		result += " {" + new_hobo.toString();
-		if (new_hobo.child != null) result += printChildren(new_hobo, "");
-		result += "}";
-		return result;
+		sb.append(node.toString()).append("\n");
+
+		if (node.child != null) {
+			BinomialHeap.HeapNode child = node.child;
+			do {
+				appendTree(sb, child, indent, child.next == node.child);
+				child = child.next;
+			} while (child != node.child);
+		}
 	}
 
 	public HeapItem insert(int key, String info)
@@ -295,7 +305,7 @@ public class BinomialHeap
 				while (remainder.rank == b_node.rank) {
 					b_next = b_node.next;
 					remainder = two_nodes(b_node, remainder);
-					remainder.next = remainder;
+					//remainder.next = remainder;
 					b_node = b_next;
 					exp++;
 				}
@@ -389,15 +399,22 @@ public class BinomialHeap
 
 	private HeapNode two_nodes(HeapNode node1,HeapNode node2)
 	{
+		HeapNode new_node1, new_node2;
+		new_node1 = new HeapNode(node1.item,node1.child,node1.next,node1.parent,node1.rank);
+		new_node2 = new HeapNode(node2.item,node2.child,node2.next,node2.parent,node2.rank);
+		new_node1.next = new_node1;
+		new_node1.item.node = new_node1;
+		new_node2.next = new_node2;
+		new_node2.item.node = new_node2;
 		if (node1.item.key <= node2.item.key)
 		{
-			node1.concatenate(node2);
-			return node1;
+			new_node1.concatenate(new_node2);
+			return new_node1;
 		}
 		else
 		{
-			node2.concatenate(node1);
-			return node2;
+			new_node2.concatenate(new_node1);
+			return new_node2;
 		}
 	}
 
@@ -516,17 +533,16 @@ public class BinomialHeap
 	public static void main(String[] args)
 	{
 		BinomialHeap b = new BinomialHeap();
-		HeapItem i = new HeapItem(1,"1");
+		HeapItem i = new HeapItem(16,"16");
 		b.last = new HeapNode(i,null,null,null,0);
 		b.last.item = i;
 		b.last.next = b.last;
 		b.size++;
-		int[] arr = {3,1,6,5,7,2,4};
-		for (int j = 0; j < arr.length; j++)
-		{
-			System.out.println("inserting " + arr[j]);
-			b.insert(arr[j],Integer.toString(arr[j]));
+		for (int j = 15; j >=1; j--) {
+			System.out.println("inserting " + j);
+			b.insert(j, Integer.toString(j));
 		}
+		b.deleteMin();
 		System.out.println(b);
 
 	}
