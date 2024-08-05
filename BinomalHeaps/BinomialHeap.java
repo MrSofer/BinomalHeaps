@@ -124,6 +124,12 @@ public class BinomialHeap
 			}
 			else {
 				this.last = this.min.child;
+				this.last.parent = null;
+				HeapNode n = this.last.next;
+				do{
+					n.parent = null;
+					n = n.next;
+				}while(n != this.last);
 				this.min = findMin().node;
 			}
 			this.size--;
@@ -215,9 +221,11 @@ public class BinomialHeap
 	 * Delete the item from the heap.
 	 *
 	 */
-	public void delete(HeapItem item) 
-	{    
-		return; // should be replaced by student code
+	public void delete(HeapItem item)
+	{
+		if (item.key > min.item.key) decreaseKey(item, item.key - this.min.item.key + 1);
+		else decreaseKey(item, item.key - this.min.item.key);
+		deleteMin();
 	}
 
 	/**
@@ -228,6 +236,7 @@ public class BinomialHeap
 
 	public void meld(BinomialHeap heap2)
 	{
+		int counter = 0;//for the tests
 		BinomialHeap bigger_heap, smaller_heap;
 		HeapNode b_node,s_node,b_next,s_next, remainder = null;
 		int exp = 0;
@@ -277,21 +286,25 @@ public class BinomialHeap
 						break;
 					case 5:
 						remainder = two_nodes(b_node, s_node);
+						counter++;//for the tests
 						b_node = b_next;
 						s_node = s_next;
 						break;
 					case 6:
 						remainder = two_nodes(b_node, remainder);
+						counter++;//for the tests
 						b_node = b_next;
 						break;
 					case 7:
 						remainder = two_nodes(s_node, remainder);
+						counter++;//for the tests
 						s_node = s_next;
 						break;
 					case 8:
 						iii_nodes = three_nodes(b_node, s_node, remainder);
 						ret_arr[exp] = iii_nodes[0];
 						remainder = iii_nodes[1];
+						counter++;//for the tests
 						b_node = b_next;
 						s_node = s_next;
 						break;
@@ -305,6 +318,7 @@ public class BinomialHeap
 				while (remainder.rank == b_node.rank) {
 					b_next = b_node.next;
 					remainder = two_nodes(b_node, remainder);
+					counter++;//for the tests
 					//remainder.next = remainder;
 					b_node = b_next;
 					exp++;
@@ -323,6 +337,7 @@ public class BinomialHeap
 
 			while (ret_arr[exp] == null) {exp--;}
 			ret = ret_arr[exp];
+			for (HeapNode hn : ret_arr){if(hn != null){hn.next = ret;}}
 			exp = 0;
 			while(exp < ret_arr.length-1)
 			{
@@ -423,6 +438,7 @@ public class BinomialHeap
 		HeapNode[] cwntc = check_which_nodes_to_concatenate(b_node, s_node, remainder);
 		HeapNode[] ret = new HeapNode[2];
 		ret[0] = cwntc[0];
+		ret[0].next = ret[0];
 		ret[1] = two_nodes(cwntc[1],cwntc[2]);
 		return ret;
 	}
@@ -533,17 +549,21 @@ public class BinomialHeap
 	public static void main(String[] args)
 	{
 		BinomialHeap b = new BinomialHeap();
-		HeapItem i = new HeapItem(16,"16");
+		HeapItem i = new HeapItem(8,"8");
 		b.last = new HeapNode(i,null,null,null,0);
 		b.last.item = i;
 		b.last.next = b.last;
 		b.size++;
-		for (int j = 15; j >=1; j--) {
-			System.out.println("inserting " + j);
-			b.insert(j, Integer.toString(j));
+		int[] arr = {6,2,10,11,12,4,7,9,13,3,5,1,14,15,16};
+		for (int j = 0; j < arr.length; j++) {
+			System.out.println("inserting " + arr[j]);
+			b.insert(arr[j], Integer.toString(arr[j]));
 		}
 		b.deleteMin();
-		System.out.println(b);
-
+		b.deleteMin();
+		//while (b.size() > 13) {
+		//	b.deleteMin();
+			System.out.println(b);
+		//}
 	}
 }
