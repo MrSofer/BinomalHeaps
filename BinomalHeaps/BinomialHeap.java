@@ -120,7 +120,6 @@ public class BinomialHeap
 			if(min.child == null){
 				this.min = null;
 				this.last = null;
-				this.size--;
 			}
 			else {
 				this.last = this.min.child;
@@ -133,7 +132,6 @@ public class BinomialHeap
 				this.min = findMin().node;
 			}
 			this.size--;
-			return;
 		}
 		else {
 			/// point to the node before this.min
@@ -150,7 +148,6 @@ public class BinomialHeap
 			this.size --;
 			if(old_minimum.child != null) meldChildrenWithMainHeap(old_minimum);
 		}
-		return;
 	}
 	/**
 	 *
@@ -177,6 +174,7 @@ public class BinomialHeap
 		}
 		else {
 			n.child.parent = null;
+			this.size--;
 			BinomialHeap b = new BinomialHeap(n.child, n.child, 1);
 			this.meld(b);
 		}
@@ -211,9 +209,21 @@ public class BinomialHeap
 	 * Decrease the key of item by diff and fix the heap. 
 	 * 
 	 */
-	public void decreaseKey(HeapItem item, int diff) 
-	{    
-		return; // should be replaced by student code
+	public void decreaseKey(HeapItem item, int diff)
+	{
+		item.key -= diff;
+		HeapItem nomad = item;
+		while(nomad.node.parent != null) {
+			if (nomad.key < nomad.node.parent.item.key) {
+				int tmp_key = nomad.key;
+				nomad.key = nomad.node.parent.item.key;
+				nomad = nomad.node.parent.item;
+				nomad.key = tmp_key;
+			}
+			else break;
+		}
+		if (nomad.key < min.item.key) min = nomad.node;
+
 	}
 
 	/**
@@ -276,9 +286,11 @@ public class BinomialHeap
 						break;
 					case 2:
 						ret_arr[exp] = b_node;
+						b_node = b_node.next;
 						break;
 					case 3:
 						ret_arr[exp] = s_node;
+						s_node = s_node.next;
 						break;
 					case 4:
 						ret_arr[exp] = remainder;
@@ -312,7 +324,7 @@ public class BinomialHeap
 				}
 
 				exp++;
-			} while (s_node.rank >= exp && s_node.next != s_node);
+			} while (s_node.rank >= exp);
 
 			if (remainder != null) {
 				while (remainder.rank == b_node.rank) {
@@ -337,6 +349,7 @@ public class BinomialHeap
 
 			while (ret_arr[exp] == null) {exp--;}
 			ret = ret_arr[exp];
+			HeapNode ret_0 = ret_arr[exp];
 			for (HeapNode hn : ret_arr){if(hn != null){hn.next = ret;}}
 			exp = 0;
 			while(exp < ret_arr.length-1)
@@ -349,7 +362,7 @@ public class BinomialHeap
 					exp++;
 				}
 			}
-			this.last = ret;
+			this.last = ret_0;
 
 		}
 		HeapItem f_min = this.findMin();
@@ -554,16 +567,17 @@ public class BinomialHeap
 		b.last.item = i;
 		b.last.next = b.last;
 		b.size++;
-		int[] arr = {6,2,10,11,12,4,7,9,13,3,5,1,14,15,16};
+		int[] arr = {9,12,11,7,4,2,1,3,10,15,14,5,6,13,16};
 		for (int j = 0; j < arr.length; j++) {
 			System.out.println("inserting " + arr[j]);
 			b.insert(arr[j], Integer.toString(arr[j]));
 		}
+		for (int j = 0; j < 15; j++) {
+			b.deleteMin();
+			System.out.println(b.size());
+		}
+		System.out.println(b);
 		b.deleteMin();
-		b.deleteMin();
-		//while (b.size() > 13) {
-		//	b.deleteMin();
-			System.out.println(b);
-		//}
+		System.out.println(b.size());
 	}
 }
